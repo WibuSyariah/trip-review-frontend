@@ -16,8 +16,6 @@ export default {
       dropdownIcon: "keyboard_arrow_down",
       showModal: false,
       role: localStorage.getItem("role"),
-      newPassword: "",
-      confirmPassword: "",
       validationSchema: yup.object({
         newPassword: yup.string().required("New Password is required"),
         confirmPassword: yup
@@ -77,7 +75,7 @@ export default {
         } else {
           console.error(res.data); // Handle specific error message
           toast.error(`Password change failed. Please try again.`, {
-            position: "top-right",
+            position: "bottom-right",
             duration: 3000,
             queue: true,
           });
@@ -225,9 +223,8 @@ export default {
       @click="modalToggle"
     ></div>
     <v-card
-      class="bg-green-100 flex flex-col items-center rounded p-8 w-fit text-nowrap h-fit"
+      class="bg-green-100 flex flex-col items-center rounded p-4 w-fit text-nowrap h-fit"
     >
-      <v-icon icon="mdi-home" />
       <v-card-text>
         <Form
           :validation-schema="validationSchema"
@@ -253,10 +250,14 @@ export default {
               />
             </Field>
           </div>
-          <br />
-          <v-btn type="submit" class="bg-green-500 text-white"
-            >Change Password</v-btn
-          >
+          <div class="flex flex-col gap-4">
+            <v-btn type="submit" class="bg-green-500 text-white w-64 mb-4">
+              Change Password
+            </v-btn>
+            <v-btn @click="modalToggle" class="bg-red-500 text-white w-64 mb-4">
+              Cancel
+            </v-btn>
+          </div>
         </Form>
       </v-card-text>
     </v-card>

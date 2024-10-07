@@ -24,14 +24,14 @@ export const useAuthStore = defineStore({
         if (error.response) {
           console.error(error.response.data);
           toast.error(`${error.response.data.message}`, {
-            position: "top-right",
+            position: "bottom-right",
             duration: 3000,
             queue: true,
           });
         } else {
           console.log(error);
           toast.error(`Something went wrong`, {
-            position: "top-right",
+            position: "bottom-right",
             duration: 3000,
             queue: true,
           });
@@ -56,14 +56,14 @@ export const useAuthStore = defineStore({
         if (error.response) {
           console.error(error.response.data);
           toast.error(`${error.response.data.message}`, {
-            position: "top-right",
+            position: "bottom-right",
             duration: 3000,
             queue: true,
           });
         } else {
           console.log(error);
           toast.error(`Something went wrong`, {
-            position: "top-right",
+            position: "bottom-right",
             duration: 3000,
             queue: true,
           });

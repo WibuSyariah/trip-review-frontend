@@ -16,7 +16,7 @@ const router = createRouter({
       ],
     },
     {
-      path: "/review",
+      path: "/trip/:tripId/review",
       component: ReviewPage,
     },
   ],

@@ -17,7 +17,7 @@ app.use(router);
 app.use(pinia);
 app.use(vuetify);
 app.use(ToastPlugin, {
-  position: "top-right",
+  position: "bottom-right",
   duration: 3000,
   queue: true,
 });
