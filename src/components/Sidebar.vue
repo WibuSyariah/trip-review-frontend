@@ -90,21 +90,20 @@ export default {
 
 <template>
   <div
-    class="flex justify-between h-screen sticky top-0 bg-green-500 shadow rounded-r w-fit text-nowrap"
+    class="flex h-screen sticky top-0 bg-green-500 shadow rounded-r text-nowrap"
   >
     <div
       v-show="showSidebar"
-      class="flex flex-col w-max overflow-x-hidden overflow-y-auto"
+      class="flex flex-col overflow-x-hidden overflow-y-auto"
     >
-      <div class="py-6 flex flex-col flex-grow items-center">
-        <div class="">
-          <img
-            class="w-32 round"
-            src="https://www.moda-holding.com/wp-content/uploads/2020/03/cropped-MODA-Holding-300x61-1.png"
-          />
-        </div>
-
-        <ul class="mt-6 space-y-1">
+      <div class="mt-8 mx-2">
+        <img
+          class="round"
+          src="https://www.moda-holding.com/wp-content/uploads/2020/03/cropped-MODA-Holding-300x61-1.png"
+        />
+      </div>
+      <div class="mt-4 flex flex-col flex-grow">
+        <ul class="space-y-1">
           <div>
             <li
               class="block rounded-lg px-4 pt-2 text-sm font-medium text-black hover:text-gray-700 text-nowrap cursor-pointer flex justify-between"
@@ -179,12 +178,12 @@ export default {
                   </div>
                 </li>
               </RouterLink>
-              <RouterLink to="/master/emoney">
+              <RouterLink to="/master/e-money">
                 <li>
                   <div
                     class="block rounded-lg px-4 py-2 text-sm font-medium text-black hover:text-gray-700"
                   >
-                    E-money
+                    E-Money
                   </div>
                 </li>
               </RouterLink>
@@ -192,7 +191,7 @@ export default {
           </div>
         </ul>
       </div>
-      <ul class="mb-4">
+      <ul class="flex flex-col items-center mb-4">
         <li
           class="block rounded-lg px-4 py-2 text-sm font-medium text-black hover:text-gray-700 cursor-pointer"
           @click="modalToggle"
@@ -209,7 +208,7 @@ export default {
     </div>
     <div
       @click="sidebarToggle"
-      class="cursor-pointer justify-center flex bg-green-600 shadow rounded-r items-center text-white w-4"
+      class="cursor-pointer justify-center flex bg-green-600 shadow rounded-r items-center w-4"
     >
       <i class="material-symbols-outlined text-black">{{ sidebarIcon }}</i>
     </div>

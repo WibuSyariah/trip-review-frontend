@@ -13,8 +13,9 @@ export const useTripStore = defineStore({
     dropdown: {
       drivers: [],
       cars: [],
+      companies: [],
       divisions: [],
-      emoneys: [],
+      eMoneys: [],
     },
     query: {
       limit: 10,
@@ -45,7 +46,7 @@ export const useTripStore = defineStore({
         this.query.currentPage = res.data.data.currentPage;
         this.trips = res.data.data.trips;
 
-        console.log(this.trips);
+        // console.log(this.trips, "masuk coy");
       } catch (error) {
         console.error(error);
         toast.error(`Something went wrong`, {
@@ -62,7 +63,7 @@ export const useTripStore = defineStore({
           url: `${baseUrl[mode]}${apiPrefix}/trip/${tripId}`,
         });
 
-        console.log(res.data, "ini data")
+        console.log(res.data, "ini data");
 
         this.trip = res.data.data.trip;
       } catch (error) {
@@ -84,7 +85,6 @@ export const useTripStore = defineStore({
         }
       }
     },
-
     async fetchTripDropdown() {
       const accessToken = localStorage.getItem("accessToken");
       try {
@@ -105,13 +105,17 @@ export const useTripStore = defineStore({
           title: car.name, // Mapping car name to `title`
           value: car.id, // Mapping car ID to `value`
         }));
+        this.dropdown.companies = res.data.data.companies.map((company) => ({
+          title: company.name, // Mapping company name to `title`
+          value: company.id, // Mapping company ID to `value`
+        }));
         this.dropdown.divisions = res.data.data.divisions.map((division) => ({
           title: division.name, // Mapping division name to `title`
           value: division.id, // Mapping division ID to `value`
         }));
-        this.dropdown.emoneys = res.data.data.emoneys.map((emoney) => ({
-          title: emoney.name, // Mapping emoney name to `title`
-          value: emoney.id, // Mapping emoney ID to `value`
+        this.dropdown.eMoneys = res.data.data.eMoneys.map((eMoney) => ({
+          title: eMoney.name, // Mapping eMoney name to `title`
+          value: eMoney.id, // Mapping eMoney ID to `value`
         }));
 
         console.log(this.dropdown.drivers, "ini cuy");
