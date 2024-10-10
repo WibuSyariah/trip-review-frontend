@@ -28,13 +28,21 @@ export default {
   },
   computed: {
     ...mapWritableState(useTripStore, ["trip"]),
+
+    isSubmitDisabled() {
+      if (this.rating <= 3 && !this.feedback) {
+        return true;
+      } else {
+        return false;
+      }
+    },
   },
   methods: {
     ...mapActions(useTripStore, ["fetchTripDetail"]),
     ...mapActions(useReviewStore, ["createReview"]),
 
     formatDate(dateString) {
-      return dayjs(dateString).format("HH:mm MMMM D, YYYY");
+      return dayjs(dateString).format("HH:mm MM/D/YYYY");
     },
     setRating(star) {
       this.rating = star;
@@ -77,13 +85,13 @@ export default {
 
         const res = await this.createReview({
           tripId: this.$route.params.tripId,
-          star: this.rating,
+          rating: this.rating,
           feedback: this.feedback,
         });
 
         if (res.status === 201) {
           // Check for successful response
-          this.$toast.success("Review submitted");
+          this.$toast.success("Review submitted successfully");
         }
       } catch (error) {
         this.feedback = "";
@@ -119,12 +127,26 @@ export default {
 
       <!-- Trip Details -->
       <div v-else>
-        <div class="mb-4 text-center">
+        <div class="mb-4 text-center flex flex-col items-center gap-4">
           <h2 class="text-xl font-semibold">
             Trip with {{ trip.Driver.name }}
           </h2>
-          <h2 class="text-xl font-semibold">To {{ trip.location }}</h2>
-          <p class="text-gray-600">{{ formatDate(trip.date) }}</p>
+          <img
+            crossorigin="anonymous"
+            :src="trip.Driver.image"
+            alt="Trip Image"
+            class="w-24 h-24"
+          />
+          <h2 class="font-semibold">
+            {{ trip.destination }}
+          </h2>
+          <h2 class="font-semibold">
+            {{ trip.location }}
+          </h2>
+          <p class="text-gray-600 text-nowrap">
+            {{ formatDate(trip.startDateTime) }} -
+            {{ formatDate(trip.endDateTime) }}
+          </p>
         </div>
 
         <!-- Star Rating -->
@@ -180,11 +202,16 @@ export default {
         <!-- Submit Button -->
         <button
           type="button"
-          class="w-full p-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition duration-150 ease-in-out"
+          class="w-full p-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition duration-150 ease-in-out cursor-pointer"
           @click="submitReviewHandler"
+          :disabled="isSubmitDisabled"
         >
           Submit Review
         </button>
+
+        <h1 v-show="isSubmitDisabled && rating !== 0" class="mt-2">
+          Feedback is required if your rating is 3 or below.
+        </h1>
       </div>
     </div>
   </div>

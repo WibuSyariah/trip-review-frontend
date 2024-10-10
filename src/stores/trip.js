@@ -10,6 +10,8 @@ export const useTripStore = defineStore({
   state: () => ({
     trip: {},
     trips: [],
+    tripCount: 0,
+    avgRating: 0,
     dropdown: {
       drivers: [],
       cars: [],
@@ -45,6 +47,8 @@ export const useTripStore = defineStore({
         this.query.totalPages = res.data.data.totalPages;
         this.query.currentPage = res.data.data.currentPage;
         this.trips = res.data.data.trips;
+        this.tripCount = res.data.data.tripCount;
+        this.avgRating = res.data.data.avgRating;
 
         // console.log(this.trips, "masuk coy");
       } catch (error) {

@@ -9,8 +9,8 @@ export default {
   name: "Sidebar",
   data() {
     return {
-      showSidebar: true,
-      sidebarIcon: "arrow_left",
+      showSidebar: false,
+      sidebarIcon: "arrow_right",
       showMasterData: false,
       showTripReview: false,
       dropdownIcon: "keyboard_arrow_down",
@@ -90,15 +90,13 @@ export default {
 
 <template>
   <div
-    class="flex h-screen sticky top-0 bg-green-500 shadow rounded-r text-nowrap"
+    class="flex h-screen sticky top-0 bg-green-500 shadow text-nowrap w-fit"
+    v-show="showSidebar"
   >
-    <div
-      v-show="showSidebar"
-      class="flex flex-col overflow-x-hidden overflow-y-auto"
-    >
-      <div class="mt-8 mx-2">
+    <div class="flex flex-col overflow-x-hidden overflow-y-auto">
+      <div class="mt-8 mx-auto">
         <img
-          class="round"
+          class="w-32"
           src="https://www.moda-holding.com/wp-content/uploads/2020/03/cropped-MODA-Holding-300x61-1.png"
         />
       </div>
@@ -122,15 +120,15 @@ export default {
                   </div>
                 </li>
               </RouterLink>
-              <RouterLink to="/review">
-                <li>
-                  <div
-                    class="block rounded-lg px-4 py-2 text-sm font-medium text-black hover:text-gray-700"
-                  >
-                    Review List
-                  </div>
-                </li>
-              </RouterLink>
+              <!-- <RouterLink to="/review"> -->
+              <li>
+                <div
+                  class="block rounded-lg px-4 py-2 text-sm font-medium text-black hover:text-gray-700"
+                >
+                  Review List
+                </div>
+              </li>
+              <!-- </RouterLink> -->
             </ul>
           </div>
           <div v-if="role === 'SUPERADMIN' || 'ADMIN'">
@@ -142,56 +140,56 @@ export default {
               <i class="material-symbols-outlined">{{ dropdownIcon }}</i>
             </li>
             <ul v-show="showMasterData" class="">
-              <RouterLink to="/master/user">
-                <li>
-                  <div
-                    class="block rounded-lg px-4 py-2 text-sm font-medium text-black hover:text-gray-700"
-                  >
-                    User
-                  </div>
-                </li>
-              </RouterLink>
-              <RouterLink to="/master/driver">
-                <li>
-                  <div
-                    class="block rounded-lg px-4 py-2 text-sm font-medium text-black hover:text-gray-700"
-                  >
-                    Driver
-                  </div>
-                </li>
-              </RouterLink>
-              <RouterLink to="/master/car">
-                <li>
-                  <div
-                    class="block rounded-lg px-4 py-2 text-sm font-medium text-black hover:text-gray-700"
-                  >
-                    Car
-                  </div>
-                </li>
-              </RouterLink>
-              <RouterLink to="/master/division">
-                <li>
-                  <div
-                    class="block rounded-lg px-4 py-2 text-sm font-medium text-black hover:text-gray-700"
-                  >
-                    Division
-                  </div>
-                </li>
-              </RouterLink>
-              <RouterLink to="/master/e-money">
-                <li>
-                  <div
-                    class="block rounded-lg px-4 py-2 text-sm font-medium text-black hover:text-gray-700"
-                  >
-                    E-Money
-                  </div>
-                </li>
-              </RouterLink>
+              <!-- <RouterLink to="/master/user"> -->
+              <li>
+                <div
+                  class="block rounded-lg px-4 py-2 text-sm font-medium text-black hover:text-gray-700"
+                >
+                  User
+                </div>
+              </li>
+              <!-- </RouterLink> -->
+              <!-- <RouterLink to="/master/driver"> -->
+              <li>
+                <div
+                  class="block rounded-lg px-4 py-2 text-sm font-medium text-black hover:text-gray-700"
+                >
+                  Driver
+                </div>
+              </li>
+              <!-- </RouterLink> -->
+              <!-- <RouterLink to="/master/car"> -->
+              <li>
+                <div
+                  class="block rounded-lg px-4 py-2 text-sm font-medium text-black hover:text-gray-700"
+                >
+                  Car
+                </div>
+              </li>
+              <!-- </RouterLink> -->
+              <!-- <RouterLink to="/master/division"> -->
+              <li>
+                <div
+                  class="block rounded-lg px-4 py-2 text-sm font-medium text-black hover:text-gray-700"
+                >
+                  Division
+                </div>
+              </li>
+              <!-- </RouterLink> -->
+              <!-- <RouterLink to="/master/e-money"> -->
+              <li>
+                <div
+                  class="block rounded-lg px-4 py-2 text-sm font-medium text-black hover:text-gray-700"
+                >
+                  E-Money
+                </div>
+              </li>
+              <!-- </RouterLink> -->
             </ul>
           </div>
         </ul>
       </div>
-      <ul class="flex flex-col items-center mb-4">
+      <ul class="flex flex-col mb-4">
         <li
           class="block rounded-lg px-4 py-2 text-sm font-medium text-black hover:text-gray-700 cursor-pointer"
           @click="modalToggle"
@@ -206,13 +204,15 @@ export default {
         </li>
       </ul>
     </div>
-    <div
-      @click="sidebarToggle"
-      class="cursor-pointer justify-center flex bg-green-600 shadow rounded-r items-center w-4"
-    >
-      <i class="material-symbols-outlined text-black">{{ sidebarIcon }}</i>
-    </div>
   </div>
+  <div
+    @click="sidebarToggle"
+    class="cursor-pointer justify-center flex h-screen sticky bg-green-600 shadow rounded-r items-center w-4"
+  >
+    <i class="material-symbols-outlined text-black">{{ sidebarIcon }}</i>
+  </div>
+
+  <!-- Modal Change Password -->
   <div
     v-if="showModal"
     class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto"

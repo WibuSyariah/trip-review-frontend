@@ -3,7 +3,7 @@ import { RouterLink } from "vue-router";
 import { mapWritableState, mapActions } from "pinia";
 import { useTripStore } from "@/stores/trip";
 import dayjs from "dayjs";
-import { Form, Field, useForm } from "vee-validate";
+import { Form, Field } from "vee-validate";
 import * as yup from "yup";
 
 export default {
@@ -11,6 +11,8 @@ export default {
   data() {
     return {
       showCreateModal: false,
+      showDetailModal: false,
+      feedback: "",
       addTripValidationSchema: yup.object({
         passenger: yup.string().required("Passenger is required"),
         destination: yup.string().required("Destination is required"),
@@ -24,6 +26,7 @@ export default {
         divisionId: yup.string().required("Division is required"),
         eMoneyId: yup.string().required("E-Money is required"),
       }),
+      searchBarKey: 0,
       filterTripValidationSchema: yup
         .object({
           startDateTime: yup.string().required("Start Date & Time is required"),
@@ -56,6 +59,8 @@ export default {
       "query",
       "dropdown",
       "defaultQuery",
+      "tripCount",
+      "avgRating",
     ]),
   },
   components: {
@@ -86,11 +91,18 @@ export default {
         totalPages: 1,
       };
 
+      this.reloadSearchBar();
+
       await this.fetchTrip(this.query);
     },
 
     createModalToggle() {
       this.showCreateModal = !this.showCreateModal;
+    },
+
+    detailModalToggle(value) {
+      this.feedback = value;
+      this.showDetailModal = !this.showDetailModal;
     },
 
     formatDate(dateString) {
@@ -111,6 +123,7 @@ export default {
     escKeyHandler(event) {
       if (event.key === "Escape") {
         this.showCreateModal = false;
+        this.showDetailModal = false;
       }
     },
 
@@ -129,14 +142,34 @@ export default {
         console.error(error);
       }
     },
+
+    refreshPage() {
+      location.reload(); // Reloads the current page
+    },
+
+    reloadSearchBar() {
+      this.searchBarKey += 1; // Change the key to force reloading
+    },
+
+    async nextPage() {
+      this.query.currentPage++;
+
+      await this.fetchTrip(this.query);
+    },
+
+    async backPage() {
+      this.query.currentPage--;
+
+      await this.fetchTrip(this.query);
+    },
   },
 };
 </script>
 
 <template>
-  <div class="w-full pr-8 pl-4 py-8">
+  <div class="w-full pr-8 pl-4 py-8 flex flex-col gap-4">
     <!-- Heading and Add Trip Button -->
-    <div class="flex justify-between items-center mb-8">
+    <div class="flex justify-between items-center">
       <!-- Left: Trip List Title -->
       <div class="text-3xl font-bold">
         <h1>Trip List</h1>
@@ -144,17 +177,19 @@ export default {
 
       <!-- Right: Add Trip Button -->
       <div class="flex gap-4">
-        <v-btn class="bg-green-600 text-white w-24" @click="createModalToggle">
-          Excel
-        </v-btn>
-        <v-btn class="bg-blue-600 text-white w-24" @click="createModalToggle">
-          Add
+        <v-btn
+          class="material-symbols-outlined bg-blue-600 text-white w-24 text-3xl font-bold"
+          @click="createModalToggle"
+        >
+          add
         </v-btn>
       </div>
     </div>
 
+    <!-- Search Bar Section -->
     <div
-      class="flex mb-4 pt-6 overflow-x-auto justify-center bg-gray-100 rounded"
+      class="flex justify-around pt-6 overflow-x-auto px-4 bg-gray-100 rounded shadow w-full"
+      :key="searchBarKey"
     >
       <Form
         class="flex gap-4"
@@ -210,6 +245,16 @@ export default {
               class="w-56"
             />
           </Field>
+          <Field name="rating" v-slot="{ field, meta }">
+            <v-select
+              v-bind="field"
+              label="Select Rating"
+              :items="[1, 2, 3, 4, 5]"
+              placeholder="Select Rating"
+              :error-messages="meta.touched ? meta.errors : []"
+              class="w-56"
+            />
+          </Field>
         </div>
 
         <div class="flex gap-4">
@@ -225,12 +270,40 @@ export default {
           >
             search
           </button>
+          <button
+            type="button"
+            class="material-symbols-outlined bg-green-600 text-white w-24 rounded h-14"
+          >
+            description
+          </button>
         </div>
       </Form>
     </div>
 
+    <!--  Trip Count and Average Rating Section -->
+    <div
+      class="flex justify-around items-center bg-gray-100 shadow rounded py-2 w-full"
+    >
+      <!-- Trip Count -->
+      <div class="text-center">
+        <div class="text-2xl font-bold text-blue-600">{{ this.tripCount }}</div>
+        <div class="text-black">Trip Count</div>
+      </div>
+
+      <!-- Divider (optional) -->
+      <div class="h-12 border-l-2 border-gray-300"></div>
+
+      <!-- Average Rating -->
+      <div class="text-center">
+        <div class="text-2xl font-bold text-yellow-500">
+          {{ this.avgRating }}
+        </div>
+        <div class="text-black">Average Rating</div>
+      </div>
+    </div>
+
     <!-- Table Section -->
-    <v-table class="rounded bg-gray-100">
+    <v-table class="rounded flex bg-gray-100 shadow">
       <thead>
         <tr>
           <th class="text-center">Passenger</th>
@@ -244,7 +317,7 @@ export default {
           <th class="text-center">Company</th>
           <th class="text-center">Division</th>
           <th class="text-center text-nowrap">E-Money</th>
-          <th class="text-center">Status</th>
+          <th class="text-center">Rating</th>
           <th class="text-center">Action</th>
         </tr>
       </thead>
@@ -268,26 +341,98 @@ export default {
           <td class="text-center text-nowrap">{{ trip.Company.name }}</td>
           <td class="text-center text-nowrap">{{ trip.Division.name }}</td>
           <td class="text-center text-nowrap">{{ trip.EMoney.name }}</td>
-          <td
-            :class="trip.reviewStatus ? 'text-yellow-400' : 'text-gray-400'"
-            class="text-center text-nowrap"
-          >
-            <span class="material-symbols-outlined p-1">star</span>
+          <td class="text-center text-nowrap">
+            <span
+              v-for="star in 5"
+              :key="star"
+              class="material-symbols-outlined"
+              :class="{
+                'text-yellow-400':
+                  trip.reviewStatus && star <= trip.Review.rating,
+                'text-gray-400':
+                  !trip.reviewStatus || star > trip.Review.rating,
+              }"
+            >
+              star
+            </span>
           </td>
-          <td class="items-center flex gap-2">
+          <td class="items-center justify-center flex gap-2">
             <v-btn
               class="bg-green-600 text-white w-24"
+              @click="detailModalToggle(trip.Review.feedback)"
+              v-show="trip.reviewStatus"
+            >
+              Detail
+            </v-btn>
+            <v-btn
+              class="bg-blue-600 text-white w-24"
               @click="copyToClipboard(trip.id)"
             >
-              Copy Link
+              Review
             </v-btn>
-            <RouterLink :to="`/trip/${trip.id}/review`">
-              <v-btn class="bg-blue-600 text-white w-24"> Review </v-btn>
-            </RouterLink>
           </td>
         </tr>
       </tbody>
     </v-table>
+
+    <!-- Pagination Section -->
+    <div class="flex items-center justify-center">
+      <div
+        class="inline-flex items-center justify-center gap-3 bg-gray-100 py-2 rounded w-36 shadow rounded"
+      >
+        <!-- Previous Page Button -->
+        <a
+          href="#"
+          class="inline-flex size-8 items-center justify-center rounded border border-black border-solid bg-gray-300 text-gray-900 rtl:rotate-180"
+          v-show="query.currentPage > 1"
+          @click="backPage"
+        >
+          <span class="sr-only">Previous Page</span>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-3 w-3"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
+              clip-rule="evenodd"
+            />
+          </svg>
+        </a>
+
+        <!-- Current Page Indicator -->
+        <p class="text-xs text-gray-900" v-show="query.totalPages > 0">
+          {{ query.currentPage }}
+          <span class="mx-0.25">/</span>
+          {{ query.totalPages }}
+        </p>
+        <p v-show="query.totalPages <= 0">No data found</p>
+
+        <!-- Next Page Button -->
+        <a
+          href="#"
+          class="inline-flex size-8 items-center justify-center rounded border border-black border-solid bg-gray-300 text-gray-900 rtl:rotate-180"
+          v-show="query.currentPage < query.totalPages"
+          @click="nextPage"
+        >
+          <span class="sr-only">Next Page</span>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-3 w-3"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+              clip-rule="evenodd"
+            />
+          </svg>
+        </a>
+      </div>
+    </div>
 
     <!-- Create Modal Section -->
     <div
@@ -442,15 +587,39 @@ export default {
             <div class="flex justify-between gap-4">
               <v-btn
                 @click="createModalToggle"
-                class="bg-red-600 text-white w-48 mb-4"
+                class="material-symbols-outlined bg-red-600 text-white w-48 mb-4 text-3xl font-bold"
               >
-                Cancel
+                clear
               </v-btn>
-              <v-btn type="submit" class="bg-green-600 text-white w-48 mb-4">
-                Add Trip
+              <v-btn
+                type="submit"
+                class="material-symbols-outlined bg-blue-600 text-white text-3xl font-bold w-48 mb-4"
+              >
+                add
               </v-btn>
             </div>
           </Form>
+        </v-card-text>
+      </v-card>
+    </div>
+
+    <!-- Detail Modal Section -->
+    <div
+      v-if="showDetailModal"
+      class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto"
+    >
+      <div
+        class="modal-backdrop fixed inset-0 bg-black opacity-50"
+        @click="detailModalToggle"
+      ></div>
+      <v-card class="bg-green-100 rounded p-4 w-2/5 h-2/5">
+        <v-card-text class="">
+          <div>
+            <h2 class="text-center text-xl font-bold mb-4">Feedback</h2>
+          </div>
+          <div>
+            <pre class="text-lg">{{ this.feedback }}</pre>
+          </div>
         </v-card-text>
       </v-card>
     </div>
