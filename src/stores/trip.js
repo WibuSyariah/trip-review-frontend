@@ -1,7 +1,8 @@
 import { defineStore } from "pinia";
 import axios from "axios";
 import { useToast } from "vue-toast-notification";
-import { mode, baseUrl, apiPrefix } from "../../config/url";
+import { mode, baseUrlApi, apiPrefix } from "../../config/url";
+import dayjs from "dayjs";
 
 const toast = useToast();
 
@@ -37,7 +38,7 @@ export const useTripStore = defineStore({
       try {
         const res = await axios({
           method: "get",
-          url: `${baseUrl[mode]}${apiPrefix}/trip`,
+          url: `${baseUrlApi[mode]}${apiPrefix}/trip`,
           params: params ? params : {},
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -60,14 +61,75 @@ export const useTripStore = defineStore({
         });
       }
     },
+    async downloadExcel(params) {
+      const accessToken = localStorage.getItem("accessToken");
+      try {
+        const res = await axios({
+          method: "get",
+          url: `${baseUrlApi[mode]}${apiPrefix}/trip/excel`,
+          params: params ? params : {},
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+          responseType: "blob", // Ensure we get the response as a Blob
+        });
+
+        // Create a URL for the blob
+        const url = window.URL.createObjectURL(new Blob([res.data]));
+
+        // Create a link element for downloading the file
+        const link = document.createElement("a");
+        link.href = url;
+
+        // Format the dates for the filename
+        const formattedStartDate = params.startDateTime
+          ? dayjs(params.startDateTime).format("DD-MM-YYYY")
+          : "start";
+        const formattedEndDate = params.endDateTime
+          ? dayjs(params.endDateTime).format("DD-MM-YYYY")
+          : "end";
+
+        let fileName = `Trips ${formattedStartDate} to ${formattedEndDate}.xlsx`;
+
+        if (params.driverId) {
+          const driver = this.dropdown.drivers.find(
+            (driver) => driver.value === params.driverId, // Use params.driverId instead of value
+          );
+
+          if (driver) {
+            // Ensure that driver exists
+            const driverName = driver.title;
+            fileName = `Trips ${formattedStartDate} to ${formattedEndDate} - ${driverName}.xlsx`;
+          }
+        }
+
+        // Set the filename for download
+        link.setAttribute("download", fileName);
+
+        // Append to the body and trigger the download
+        document.body.appendChild(link);
+        link.click();
+
+        // Clean up the URL and remove the link element
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      } catch (error) {
+        console.error(error);
+        toast.error("Something went wrong", {
+          position: "bottom-right",
+          duration: 3000,
+          queue: true,
+        });
+      }
+    },
     async fetchTripDetail(tripId) {
       try {
         const res = await axios({
           method: "get",
-          url: `${baseUrl[mode]}${apiPrefix}/trip/${tripId}`,
+          url: `${baseUrlApi[mode]}${apiPrefix}/trip/${tripId}`,
         });
 
-        console.log(res.data, "ini data");
+        // console.log(res.data, "ini data");
 
         this.trip = res.data.data.trip;
       } catch (error) {
@@ -94,7 +156,7 @@ export const useTripStore = defineStore({
       try {
         const res = await axios({
           method: "get",
-          url: `${baseUrl[mode]}${apiPrefix}/dropdown/trip-form`,
+          url: `${baseUrlApi[mode]}${apiPrefix}/dropdown/trip-form`,
           headers: {
             Authorization: `Bearer ${accessToken}`,
           },
@@ -137,7 +199,7 @@ export const useTripStore = defineStore({
       try {
         const res = await axios({
           method: "post",
-          url: `${baseUrl[mode]}${apiPrefix}/trip`,
+          url: `${baseUrlApi[mode]}${apiPrefix}/trip`,
           data: input,
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -169,7 +231,7 @@ export const useTripStore = defineStore({
       try {
         const res = await axios({
           method: "delete",
-          url: `${baseUrl[mode]}${apiPrefix}/trip/${tripId}`,
+          url: `${baseUrlApi[mode]}${apiPrefix}/trip/${tripId}`,
           headers: {
             Authorization: `Bearer ${accessToken}`,
           },
@@ -200,7 +262,7 @@ export const useTripStore = defineStore({
       try {
         const res = await axios({
           method: "patch",
-          url: `${baseUrl}${apiPrefix}/trip/${tripId}`,
+          url: `${baseUrlApi}${apiPrefix}/trip/${tripId}`,
           data: input,
           headers: {
             Authorization: `Bearer ${accessToken}`,

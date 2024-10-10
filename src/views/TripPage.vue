@@ -5,6 +5,7 @@ import { useTripStore } from "@/stores/trip";
 import dayjs from "dayjs";
 import { Form, Field } from "vee-validate";
 import * as yup from "yup";
+import { mode, baseUrl } from "../../config/url";
 
 export default {
   name: "TripPage",
@@ -72,6 +73,7 @@ export default {
       "fetchTrip",
       "fetchTripDropdown",
       "createTrip",
+      "downloadExcel",
     ]),
 
     async filterHandler(values) {
@@ -96,6 +98,10 @@ export default {
       await this.fetchTrip(this.query);
     },
 
+    async downloadExcelHandler(values) {
+      await this.downloadExcel(values);
+    },
+
     createModalToggle() {
       this.showCreateModal = !this.showCreateModal;
     },
@@ -111,7 +117,7 @@ export default {
 
     copyToClipboard(tripId) {
       navigator.clipboard
-        .writeText(`http://localhost:5000/trip/${tripId}/review`)
+        .writeText(`${baseUrl[mode]}/trip/${tripId}/review`)
         .then(() => {
           this.$toast.success("Copied to clipboard");
         })
@@ -129,7 +135,6 @@ export default {
 
     async addTripHandler(values) {
       try {
-        console.log(values, "cek values");
         const res = await this.createTrip(values);
 
         if (res.status === 201) {
@@ -141,10 +146,6 @@ export default {
       } catch (error) {
         console.error(error);
       }
-    },
-
-    refreshPage() {
-      location.reload(); // Reloads the current page
     },
 
     reloadSearchBar() {
@@ -188,13 +189,14 @@ export default {
 
     <!-- Search Bar Section -->
     <div
-      class="flex justify-around pt-6 overflow-x-auto px-4 bg-gray-100 rounded shadow w-full"
+      class="flex justify-around pb-2 pt-8 overflow-x-auto px-4 bg-gray-100 rounded shadow w-full"
       :key="searchBarKey"
     >
       <Form
         class="flex gap-4"
         :validation-schema="filterTripValidationSchema"
         @submit="filterHandler"
+        v-slot="{ values }"
       >
         <div class="flex gap-4">
           <Field name="startDateTime" v-slot="{ field, meta }">
@@ -271,6 +273,7 @@ export default {
             search
           </button>
           <button
+            @click.prevent="downloadExcelHandler(values)"
             type="button"
             class="material-symbols-outlined bg-green-600 text-white w-24 rounded h-14"
           >

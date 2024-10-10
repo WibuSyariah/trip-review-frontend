@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import axios from "axios";
 import { useToast } from "vue-toast-notification";
-import { mode, baseUrl, apiPrefix } from "../../config/url";
+import { mode, baseUrlApi, apiPrefix } from "../../config/url";
 
 const toast = useToast();
 
@@ -14,7 +14,7 @@ export const useAuthStore = defineStore({
       try {
         const res = await axios({
           method: "post",
-          url: `${baseUrl[mode]}${apiPrefix}/auth/login`,
+          url: `${baseUrlApi[mode]}${apiPrefix}/auth/login`,
           data: input,
         });
 
@@ -43,7 +43,7 @@ export const useAuthStore = defineStore({
       try {
         const res = await axios({
           method: "patch",
-          url: `${baseUrl[mode]}${apiPrefix}/auth/password`,
+          url: `${baseUrlApi[mode]}${apiPrefix}/auth/password`,
           data: input,
           headers: {
             Authorization: `Bearer ${accessToken}`,

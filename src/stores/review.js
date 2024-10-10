@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import axios from "axios";
 import { useToast } from "vue-toast-notification";
-import { mode, baseUrl, apiPrefix } from "../../config/url";
+import { mode, baseUrlApi, apiPrefix } from "../../config/url";
 
 const toast = useToast();
 
@@ -27,7 +27,7 @@ export const useReviewStore = defineStore({
       try {
         const res = await axios({
           method: "get",
-          url: `${baseUrl[mode]}${apiPrefix}/trip`,
+          url: `${baseUrlApi[mode]}${apiPrefix}/trip`,
           params: params ? params : {},
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -53,7 +53,7 @@ export const useReviewStore = defineStore({
       try {
         const res = await axios({
           method: "post",
-          url: `${baseUrl[mode]}${apiPrefix}/review`,
+          url: `${baseUrlApi[mode]}${apiPrefix}/review`,
           data: input,
         });
 

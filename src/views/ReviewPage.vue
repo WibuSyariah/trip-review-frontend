@@ -80,7 +80,11 @@ export default {
         let itemsString = this.convertArrayToString(this.selectedComplaints);
 
         if (itemsString) {
-          this.feedback = this.feedback + `\n${itemsString}`;
+          if (this.feedback) {
+            this.feedback = this.feedback + `\n${itemsString}`;
+          } else {
+            this.feedback = `${itemsString}`;
+          }
         }
 
         const res = await this.createReview({
