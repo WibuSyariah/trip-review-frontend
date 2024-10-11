@@ -131,7 +131,7 @@ export default {
               <!-- </RouterLink> -->
             </ul>
           </div>
-          <div v-if="role === 'SUPERADMIN' || 'ADMIN'">
+          <div v-if="role === 0">
             <li
               class="block rounded-lg px-4 pt-2 text-sm font-medium text-black hover:text-gray-700 text-nowrap cursor-pointer flex justify-between"
               @click="masterDataToggle"

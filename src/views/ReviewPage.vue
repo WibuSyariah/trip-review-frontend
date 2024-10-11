@@ -125,11 +125,17 @@ export default {
     >
       <!-- Loading Indicator -->
       <div v-if="loading" class="text-center">
-        <!-- Optionally, you can add a spinner here -->
         <v-progress-circular indeterminate color="blue" />
       </div>
 
-      <!-- Trip Details -->
+      <!-- Trip Reviewed Message -->
+      <div v-else-if="trip.reviewStatus" class="text-center">
+        <h2 class="text-xl font-semibold">
+          This trip has already been reviewed.
+        </h2>
+      </div>
+
+      <!-- Trip Details and Review Form -->
       <div v-else>
         <div class="mb-4 text-center flex flex-col items-center gap-4">
           <h2 class="text-xl font-semibold">
@@ -141,12 +147,8 @@ export default {
             alt="Trip Image"
             class="w-24 h-24"
           />
-          <h2 class="font-semibold">
-            {{ trip.destination }}
-          </h2>
-          <h2 class="font-semibold">
-            {{ trip.location }}
-          </h2>
+          <h2 class="font-semibold">{{ trip.destination }}</h2>
+          <h2 class="font-semibold">{{ trip.location }}</h2>
           <p class="text-gray-600 text-nowrap">
             {{ formatDate(trip.startDateTime) }} -
             {{ formatDate(trip.endDateTime) }}
@@ -192,9 +194,9 @@ export default {
 
         <!-- Feedback Form -->
         <div class="mb-4">
-          <label for="feedback" class="block text-sm font-medium text-gray-700"
-            >Feedback</label
-          >
+          <label for="feedback" class="block text-sm font-medium text-gray-700">
+            Feedback
+          </label>
           <textarea
             v-model="feedback"
             class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"

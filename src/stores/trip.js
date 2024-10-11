@@ -129,9 +129,9 @@ export const useTripStore = defineStore({
           url: `${baseUrlApi[mode]}${apiPrefix}/trip/${tripId}`,
         });
 
-        // console.log(res.data, "ini data");
-
         this.trip = res.data.data.trip;
+
+        console.log(this.trip)
       } catch (error) {
         // Check if the error is an axios error
         if (error.response) {
@@ -262,7 +262,7 @@ export const useTripStore = defineStore({
       try {
         const res = await axios({
           method: "patch",
-          url: `${baseUrlApi}${apiPrefix}/trip/${tripId}`,
+          url: `${baseUrlApi[mode]}${apiPrefix}/trip/${tripId}`,
           data: input,
           headers: {
             Authorization: `Bearer ${accessToken}`,

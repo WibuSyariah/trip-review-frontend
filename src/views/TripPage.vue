@@ -11,10 +11,15 @@ export default {
   name: "TripPage",
   data() {
     return {
+      role: localStorage.getItem("role"),
       showCreateModal: false,
       showDetailModal: false,
+      showEditModal: false,
+      showDeleteModal: false,
       feedback: "",
-      addTripValidationSchema: yup.object({
+      editId: 0,
+      deleteId: 0,
+      tripValidationSchema: yup.object({
         passenger: yup.string().required("Passenger is required"),
         destination: yup.string().required("Destination is required"),
         location: yup.string().required("Location is required"),
@@ -56,6 +61,7 @@ export default {
   },
   computed: {
     ...mapWritableState(useTripStore, [
+      "trip",
       "trips",
       "query",
       "dropdown",
@@ -71,8 +77,11 @@ export default {
   methods: {
     ...mapActions(useTripStore, [
       "fetchTrip",
+      "fetchTripDetail",
       "fetchTripDropdown",
       "createTrip",
+      "editTrip",
+      "deleteTrip",
       "downloadExcel",
     ]),
 
@@ -106,9 +115,66 @@ export default {
       this.showCreateModal = !this.showCreateModal;
     },
 
+    async addTripHandler(values) {
+      try {
+        const res = await this.createTrip(values);
+
+        if (res.status === 201) {
+          // Check for successful response
+          this.fetchTrip(this.defaultQuery);
+          this.$toast.success(res.data.message);
+          this.showCreateModal = false;
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    },
+
     detailModalToggle(value) {
       this.feedback = value;
       this.showDetailModal = !this.showDetailModal;
+    },
+
+    editModalToggle(tripId) {
+      this.editId = tripId;
+      this.showEditModal = true;
+    },
+
+    async editTripHandler(values) {
+      try {
+        const res = await this.editTrip(this.editId, values);
+
+        if (res.status === 200) {
+          // Check for successful response
+          this.fetchTrip(this.defaultQuery);
+          this.showEditModal = false;
+          this.editId = null;
+          this.$toast.success(res.data.message);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    },
+
+    deleteModalToggle(tripId) {
+      this.deleteId = tripId;
+      this.showDeleteModal = true;
+    },
+
+    async deleteTripHandler() {
+      try {
+        const res = await this.deleteTrip(this.deleteId);
+
+        if (res.status === 200) {
+          // Check for successful response
+          this.fetchTrip(this.defaultQuery);
+          this.showDeleteModal = false;
+          this.deleteId = null;
+          this.$toast.success(res.data.message);
+        }
+      } catch (error) {
+        console.error(error);
+      }
     },
 
     formatDate(dateString) {
@@ -130,21 +196,6 @@ export default {
       if (event.key === "Escape") {
         this.showCreateModal = false;
         this.showDetailModal = false;
-      }
-    },
-
-    async addTripHandler(values) {
-      try {
-        const res = await this.createTrip(values);
-
-        if (res.status === 201) {
-          // Check for successful response
-          this.fetchTrip(this.defaultQuery);
-          this.$toast.success(res.data.message);
-          this.showCreateModal = false;
-        }
-      } catch (error) {
-        console.error(error);
       }
     },
 
@@ -172,14 +223,14 @@ export default {
     <!-- Heading and Add Trip Button -->
     <div class="flex justify-between items-center">
       <!-- Left: Trip List Title -->
-      <div class="text-3xl font-bold">
+      <div class="text-2xl font-bold">
         <h1>Trip List</h1>
       </div>
 
       <!-- Right: Add Trip Button -->
       <div class="flex gap-4">
         <v-btn
-          class="material-symbols-outlined bg-blue-600 text-white w-24 text-3xl font-bold"
+          class="material-symbols-outlined bg-blue-600 text-white w-24 text-2xl font-bold"
           @click="createModalToggle"
         >
           add
@@ -361,17 +412,32 @@ export default {
           </td>
           <td class="items-center justify-center flex gap-2">
             <v-btn
-              class="bg-green-600 text-white w-24"
+              class="material-symbols-outlined bg-green-600 text-white w-24"
               @click="detailModalToggle(trip.Review.feedback)"
               v-show="trip.reviewStatus"
             >
-              Detail
+              feedback
             </v-btn>
             <v-btn
-              class="bg-blue-600 text-white w-24"
+              class="material-symbols-outlined bg-blue-600 text-white w-24"
               @click="copyToClipboard(trip.id)"
+              v-show="!trip.reviewStatus"
             >
-              Review
+              reviews
+            </v-btn>
+            <v-btn
+              class="material-symbols-outlined bg-green-600 text-white w-24"
+              @click="editModalToggle(trip.id)"
+              v-show="!trip.reviewStatus"
+            >
+              edit
+            </v-btn>
+            <v-btn
+              class="material-symbols-outlined bg-red-600 text-white w-24"
+              @click="deleteModalToggle(trip.id)"
+              v-show="!trip.reviewStatus && this.role == 0"
+            >
+              delete
             </v-btn>
           </td>
         </tr>
@@ -449,7 +515,7 @@ export default {
       <v-card class="bg-green-100 flex flex-col rounded p-8 w-3/5">
         <v-card-text>
           <Form
-            :validation-schema="addTripValidationSchema"
+            :validation-schema="tripValidationSchema"
             @submit="addTripHandler"
           >
             <v-row>
@@ -590,13 +656,13 @@ export default {
             <div class="flex justify-between gap-4">
               <v-btn
                 @click="createModalToggle"
-                class="material-symbols-outlined bg-red-600 text-white w-48 mb-4 text-3xl font-bold"
+                class="material-symbols-outlined bg-red-600 text-white w-48 mb-4 text-2xl font-bold"
               >
                 clear
               </v-btn>
               <v-btn
                 type="submit"
-                class="material-symbols-outlined bg-blue-600 text-white text-3xl font-bold w-48 mb-4"
+                class="material-symbols-outlined bg-blue-600 text-white text-2xl font-bold w-48 mb-4"
               >
                 add
               </v-btn>
@@ -616,7 +682,7 @@ export default {
         @click="detailModalToggle"
       ></div>
       <v-card class="bg-green-100 rounded p-4 w-2/5 h-2/5">
-        <v-card-text class="">
+        <v-card-text>
           <div>
             <h2 class="text-center text-xl font-bold mb-4">Feedback</h2>
           </div>
@@ -626,9 +692,181 @@ export default {
         </v-card-text>
       </v-card>
     </div>
+
+    <!-- Edit Modal Section -->
+    <div
+      v-if="showEditModal"
+      class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto"
+    >
+      <div
+        class="modal-backdrop fixed inset-0 bg-black opacity-50"
+        @click="showEditModal = false"
+      ></div>
+      <v-card class="bg-green-100 flex flex-col rounded p-8 w-3/5">
+        <v-card-text>
+          <Form @submit="editTripHandler">
+            <v-row>
+              <v-col cols="4">
+                <Field name="passenger" v-slot="{ field, meta }">
+                  <v-text-field
+                    v-bind="field"
+                    label="Passenger"
+                    placeholder="Enter passenger name"
+                    :error-messages="meta.touched ? meta.errors : []"
+                  />
+                </Field>
+
+                <Field name="companyId" v-slot="{ field, meta }">
+                  <v-select
+                    v-bind="field"
+                    label="Select Company"
+                    :items="dropdown.companies"
+                    placeholder="Select company"
+                    :error-messages="meta.touched ? meta.errors : []"
+                  />
+                </Field>
+
+                <Field name="divisionId" v-slot="{ field, meta }">
+                  <v-select
+                    v-bind="field"
+                    label="Select Division"
+                    :items="dropdown.divisions"
+                    placeholder="Select division"
+                    :error-messages="meta.touched ? meta.errors : []"
+                  />
+                </Field>
+
+                <Field name="startDateTime" v-slot="{ field, meta }">
+                  <v-text-field
+                    v-bind="field"
+                    label="Start Date & Time"
+                    type="datetime-local"
+                    :error-messages="meta.touched ? meta.errors : []"
+                  />
+                </Field>
+              </v-col>
+
+              <v-col cols="4">
+                <Field name="destination" v-slot="{ field, meta }">
+                  <v-text-field
+                    v-bind="field"
+                    label="Destination"
+                    placeholder="Enter trip destination"
+                    :error-messages="meta.touched ? meta.errors : []"
+                  />
+                </Field>
+
+                <Field name="location" v-slot="{ field, meta }">
+                  <v-text-field
+                    v-bind="field"
+                    label="Location"
+                    placeholder="Enter trip location"
+                    :error-messages="meta.touched ? meta.errors : []"
+                  />
+                </Field>
+
+                <Field name="purpose" v-slot="{ field, meta }">
+                  <v-text-field
+                    v-bind="field"
+                    label="Purpose"
+                    placeholder="Enter trip purpose"
+                    :error-messages="meta.touched ? meta.errors : []"
+                  />
+                </Field>
+
+                <Field name="endDateTime" v-slot="{ field, meta }">
+                  <v-text-field
+                    v-bind="field"
+                    label="End Date & Time"
+                    type="datetime-local"
+                    :error-messages="meta.touched ? meta.errors : []"
+                  />
+                </Field>
+              </v-col>
+
+              <v-col cols="4">
+                <Field name="driverId" v-slot="{ field, meta }">
+                  <v-select
+                    v-bind="field"
+                    label="Select Driver"
+                    :items="dropdown.drivers"
+                    placeholder="Select driver"
+                    :error-messages="meta.touched ? meta.errors : []"
+                  />
+                </Field>
+
+                <Field name="carId" v-slot="{ field, meta }">
+                  <v-select
+                    v-bind="field"
+                    label="Select Car"
+                    :items="dropdown.cars"
+                    placeholder="Select car"
+                    :error-messages="meta.touched ? meta.errors : []"
+                  />
+                </Field>
+
+                <Field name="eMoneyId" v-slot="{ field, meta }">
+                  <v-select
+                    v-bind="field"
+                    label="Select E-Money"
+                    :items="dropdown.eMoneys"
+                    placeholder="Select E-Money"
+                    :error-messages="meta.touched ? meta.errors : []"
+                  />
+                </Field>
+              </v-col>
+            </v-row>
+
+            <!-- Buttons (Center-Aligned) -->
+            <div class="flex justify-between gap-4">
+              <v-btn
+                @click="showEditModal = false"
+                class="material-symbols-outlined bg-red-600 text-white w-48 mb-4 text-2xl font-bold"
+              >
+                clear
+              </v-btn>
+              <v-btn
+                type="submit"
+                class="material-symbols-outlined bg-blue-600 text-white text-2xl font-bold w-48 mb-4"
+              >
+                edit
+              </v-btn>
+            </div>
+          </Form>
+        </v-card-text>
+      </v-card>
+    </div>
+
+    <!-- Delete Modal Section -->
+    <div
+      v-if="showDeleteModal"
+      class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto"
+    >
+      <div
+        class="modal-backdrop fixed inset-0 bg-black opacity-50"
+        @click="showDeleteModal = false"
+      ></div>
+      <v-card
+        class="bg-green-100 rounded p-4 w-2/6 h-fit flex flex-col justify-"
+      >
+        <v-card-text>
+          <h2 class="text-center text-xl font-bold mb-4">Are you sure?</h2>
+        </v-card-text>
+        <v-card-actions class="flex justify-between">
+          <v-btn
+            class="material-symbols-outlined bg-red-600 text-white w-48 text-2xl font-bold"
+            @click="showDeleteModal = false"
+          >
+            clear
+          </v-btn>
+          <v-btn
+            class="material-symbols-outlined bg-blue-600 text-white w-48 text-2xl font-bold"
+            @click="deleteTripHandler"
+          >
+            check
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </div>
   </div>
 </template>
-
-<!-- <div v-if="this.divisions.length === 0">
-        <p class="font-bold text-xl">No Data Found</p>
-      </div> -->
