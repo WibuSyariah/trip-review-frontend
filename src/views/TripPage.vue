@@ -1,5 +1,4 @@
 <script>
-import { RouterLink } from "vue-router";
 import { mapWritableState, mapActions } from "pinia";
 import { useTripStore } from "@/stores/trip";
 import dayjs from "dayjs";
@@ -33,22 +32,10 @@ export default {
         eMoneyId: yup.string().required("E-Money is required"),
       }),
       searchBarKey: 0,
-      filterTripValidationSchema: yup
-        .object({
-          startDateTime: yup.string().required("Start Date & Time is required"),
-          endDateTime: yup.string().required("End Date & Time is required"),
-        })
-        .test(
-          "both-or-neither",
-          "Both Start Date & Time and End Date & Time must be filled together",
-          function (value) {
-            const { startDateTime, endDateTime } = value;
-            // Check that either both fields are filled or both are empty
-            return (
-              (!startDateTime && !endDateTime) || (startDateTime && endDateTime)
-            );
-          },
-        ),
+      filterTripValidationSchema: yup.object({
+        startDateTime: yup.string().required("Start Date & Time is required"),
+        endDateTime: yup.string().required("End Date & Time is required"),
+      }),
     };
   },
   mounted() {
@@ -61,7 +48,6 @@ export default {
   },
   computed: {
     ...mapWritableState(useTripStore, [
-      "trip",
       "trips",
       "query",
       "dropdown",
@@ -77,7 +63,6 @@ export default {
   methods: {
     ...mapActions(useTripStore, [
       "fetchTrip",
-      "fetchTripDetail",
       "fetchTripDropdown",
       "createTrip",
       "editTrip",
@@ -196,6 +181,8 @@ export default {
       if (event.key === "Escape") {
         this.showCreateModal = false;
         this.showDetailModal = false;
+        this.showEditModal = false;
+        this.showDeleteModal = false;
       }
     },
 
@@ -512,8 +499,8 @@ export default {
         class="modal-backdrop fixed inset-0 bg-black opacity-50"
         @click="createModalToggle"
       ></div>
-      <v-card class="bg-green-100 flex flex-col rounded p-8 w-3/5">
-        <v-card-text>
+      <v-card class="bg-green-100 flex flex-col rounded p-4 w-3/5">
+        <v-card-text class="flex flex-col justify-center">
           <Form
             :validation-schema="tripValidationSchema"
             @submit="addTripHandler"

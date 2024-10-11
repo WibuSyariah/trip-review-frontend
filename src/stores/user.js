@@ -78,12 +78,13 @@ export const useUserStore = defineStore({
         }
       }
     },
-    async deleteUser(userId) {
+    async editUser(userId, input) {
       const accessToken = localStorage.getItem("accessToken");
       try {
         const res = await axios({
-          method: "delete",
+          method: "patch",
           url: `${baseUrlApi[mode]}${apiPrefix}/user/${userId}`,
+          data: input,
           headers: {
             Authorization: `Bearer ${accessToken}`,
           },
@@ -109,13 +110,12 @@ export const useUserStore = defineStore({
         }
       }
     },
-    async editUser(userId, input) {
+    async deleteUser(userId) {
       const accessToken = localStorage.getItem("accessToken");
       try {
         const res = await axios({
-          method: "patch",
-          url: `${baseUrlApi}${apiPrefix}/user/${userId}`,
-          data: input,
+          method: "delete",
+          url: `${baseUrlApi[mode]}${apiPrefix}/user/${userId}`,
           headers: {
             Authorization: `Bearer ${accessToken}`,
           },

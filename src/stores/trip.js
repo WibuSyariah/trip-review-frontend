@@ -9,7 +9,6 @@ const toast = useToast();
 export const useTripStore = defineStore({
   id: "tripStore",
   state: () => ({
-    trip: {},
     trips: [],
     tripCount: 0,
     avgRating: 0,
@@ -131,7 +130,7 @@ export const useTripStore = defineStore({
 
         this.trip = res.data.data.trip;
 
-        console.log(this.trip)
+        console.log(this.trip);
       } catch (error) {
         // Check if the error is an axios error
         if (error.response) {
