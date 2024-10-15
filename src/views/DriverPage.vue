@@ -1,11 +1,11 @@
 <script>
 import { mapWritableState, mapActions } from "pinia";
-import { useUserStore } from "@/stores/user";
+import { useDriverStore } from "@/stores/driver";
 import { Form, Field } from "vee-validate";
 import * as yup from "yup";
 
 export default {
-  name: "UserPage",
+  name: "DriverPage",
   data() {
     return {
       showCreateModal: false,
@@ -13,33 +13,33 @@ export default {
       showDeleteModal: false,
       editId: 0,
       deleteId: 0,
-      userValidationSchema: yup.object({
-        username: yup.string().required("Username is required"),
-        password: yup.string().required("Password is required"),
-      }),
+      name: "",
+      image: null,
+      nameError: "",
+      imageError: "",
       searchBarKey: 0,
     };
   },
   mounted() {
-    this.fetchUser(this.query);
+    this.fetchDriver(this.query);
     document.addEventListener("keydown", this.escKeyHandler);
   },
   beforeUnmount() {
     document.removeEventListener("keydown", this.escKeyHandler);
   },
   computed: {
-    ...mapWritableState(useUserStore, ["users", "query", "defaultQuery"]),
+    ...mapWritableState(useDriverStore, ["drivers", "query", "defaultQuery"]),
   },
   components: {
     Form,
     Field,
   },
   methods: {
-    ...mapActions(useUserStore, [
-      "fetchUser",
-      "createUser",
-      "editUser",
-      "deleteUser",
+    ...mapActions(useDriverStore, [
+      "fetchDriver",
+      "createDriver",
+      "editDriver",
+      "deleteDriver",
     ]),
 
     async filterHandler(values) {
@@ -49,7 +49,7 @@ export default {
         currentPage: 1,
       };
 
-      await this.fetchUser(this.query);
+      await this.fetchDriver(this.query);
     },
 
     async clearFilterHandler() {
@@ -61,61 +61,113 @@ export default {
 
       this.reloadSearchBar();
 
-      await this.fetchUser(this.query);
+      await this.fetchDriver(this.query);
     },
 
     createModalToggle() {
       this.showCreateModal = !this.showCreateModal;
     },
 
-    async addUserHandler(values) {
-      try {
-        const res = await this.createUser(values);
+    async addDriverHandler() {
+      // Handle the form submission (e.g., upload the file)
+      const formData = new FormData();
+      formData.append("name", this.name);
+      formData.append("image", this.image);
 
-        if (res.status === 201) {
-          // Check for successful response
-          this.fetchUser(this.defaultQuery);
-          this.$toast.success(res.data.message);
-          this.showCreateModal = false;
-        }
-      } catch (error) {
-        console.error(error);
+      const res = await this.createDriver(formData);
+
+      if (res.status === 201) {
+        // Check for successful response
+        this.fetchDriver(this.defaultQuery);
+        this.$toast.success(res.data.message);
+        this.showCreateModal = false;
+        this.name = "";
+        this.image = null;
       }
     },
 
-    editModalToggle(userId) {
-      this.editId = userId;
+    handleFileChange(event) {
+      const file = event.target.files[0]; // Get the file object from input
+      if (file) {
+        this.image = file; // Set the file to the 'image' data property
+        this.imageUrl = URL.createObjectURL(file); // Generate a URL for previewing the image
+      }
+    },
+
+    validateForm() {
+      let isValid = true;
+      this.nameError = "";
+      this.imageError = "";
+
+      // Validate name
+      if (!this.name) {
+        this.nameError = "Name is required";
+        isValid = false;
+      }
+
+      // Validate image
+      if (!this.image) {
+        this.imageError = "A file is required";
+        isValid = false;
+      } else {
+        const fileTypes = [
+          "image/jpeg",
+          "image/png",
+          "image/jpg",
+          "application/pdf",
+        ];
+        if (!fileTypes.includes(this.image.type)) {
+          this.imageError = "File must be .jpg, .jpeg, .png, or .pdf";
+          isValid = false;
+        }
+        if (this.image.size > 2000000) {
+          this.imageError = "File must be less than 2MB";
+          isValid = false;
+        }
+      }
+
+      return isValid;
+    },
+
+    editModalToggle(driverId) {
+      this.editId = driverId;
       this.showEditModal = true;
     },
 
-    async editUserHandler(values) {
+    async editDriverHandler() {
       try {
-        const res = await this.editUser(this.editId, values);
+        const formData = new FormData();
+        formData.append("name", this.name);
+        formData.append("image", this.image);
+
+        const res = await this.editDriver(this.editId, formData);
 
         if (res.status === 200) {
           // Check for successful response
-          this.fetchUser(this.defaultQuery);
+          this.fetchDriver(this.defaultQuery);
           this.showEditModal = false;
           this.editId = null;
           this.$toast.success(res.data.message);
+          this.name = "";
+          this.image = null;
         }
       } catch (error) {
         console.error(error);
       }
     },
 
-    deleteModalToggle(userId) {
-      this.deleteId = userId;
+    deleteModalToggle(driverId) {
+      this.deleteId = driverId;
       this.showDeleteModal = true;
     },
 
-    async deleteUserHandler() {
+    async deleteDriverHandler() {
       try {
-        const res = await this.deleteUser(this.deleteId);
+        const res = await this.deleteDriver(this.deleteId);
 
         if (res.status === 200) {
           // Check for successful response
-          this.fetchUser(this.defaultQuery);
+          this.fetchDriver(this.defaultQuery);
           this.showDeleteModal = false;
           this.deleteId = null;
           this.$toast.success(res.data.message);
@@ -140,13 +192,13 @@ export default {
     async nextPage() {
       this.query.currentPage++;
 
-      await this.fetchUser(this.query);
+      await this.fetchDriver(this.query);
     },
 
     async backPage() {
       this.query.currentPage--;
 
-      await this.fetchUser(this.query);
+      await this.fetchDriver(this.query);
     },
   },
 };
@@ -154,14 +206,14 @@ export default {
 
 <template>
   <div class="w-full pr-4 pl-4 py-8 flex flex-col gap-4">
-    <!-- Heading and Add User Button -->
+    <!-- Heading and Add Driver Button -->
     <div class="flex justify-between items-center">
-      <!-- Left: User List Title -->
+      <!-- Left: Driver List Title -->
       <div class="text-2xl font-bold">
-        <h1>User List</h1>
+        <h1>Driver List</h1>
       </div>
 
-      <!-- Right: Add User Button -->
+      <!-- Right: Add Driver Button -->
       <div class="flex gap-4">
         <v-btn
           class="material-symbols-outlined bg-blue-600 text-white w-24 text-2xl font-bold"
@@ -172,66 +224,41 @@ export default {
       </div>
     </div>
 
-    <!-- Search Bar Section -->
-    <div
-      class="flex justify-around pb-2 pt-8 overflow-x-auto px-4 bg-gray-100 rounded shadow w-full"
-      :key="searchBarKey"
-    >
-      <Form class="flex gap-4" @submit="filterHandler">
-        <div>
-          <Field name="username" v-slot="{ field, meta }">
-            <v-text-field
-              v-bind="field"
-              label="Username"
-              placeholder="Enter Username"
-              :error-messages="meta.touched ? meta.errors : []"
-              class="w-56"
-            />
-          </Field>
-        </div>
-
-        <div class="flex gap-4">
-          <button
-            @click="clearFilterHandler"
-            type="button"
-            class="material-symbols-outlined bg-red-600 text-white w-24 rounded h-14"
-          >
-            clear
-          </button>
-          <button
-            class="material-symbols-outlined bg-blue-600 text-white w-24 rounded h-14"
-          >
-            search
-          </button>
-        </div>
-      </Form>
-    </div>
-
     <!-- Table Section -->
-    <v-table class="rounded flex bg-gray-100 shadow">
+    <v-table class="rounded flex bg-gray-100 shadow overflow-y-hidden">
       <thead>
         <tr>
-          <th class="text-center w-1/2">Username</th>
-          <th class="text-center w-1/2">Action</th>
+          <th class="text-center w-1/3">Name</th>
+          <th class="text-center w-1/3">Image</th>
+          <th class="text-center w-1/3">Action</th>
         </tr>
       </thead>
 
       <tbody>
-        <tr v-for="user in users" :key="user.id">
-          <td class="text-center text-nowrap">{{ user.username }}</td>
-          <td class="items-center justify-center flex gap-2">
-            <v-btn
-              class="material-symbols-outlined bg-green-600 text-white w-24"
-              @click="editModalToggle(user.id)"
-            >
-              edit
-            </v-btn>
-            <v-btn
-              class="material-symbols-outlined bg-red-600 text-white w-24"
-              @click="deleteModalToggle(user.id)"
-            >
-              delete
-            </v-btn>
+        <tr v-for="driver in drivers" :key="driver.id">
+          <td class="text-center text-nowrap">{{ driver.name }}</td>
+          <td>
+            <img
+              class="block mx-auto w-24 h-32 p-2"
+              crossorigin="anonymous"
+              :src="driver.image"
+            />
+          </td>
+          <td class="text-center">
+            <div class="flex justify-center gap-2">
+              <v-btn
+                class="material-symbols-outlined bg-green-600 text-white w-24"
+                @click="editModalToggle(driver.id)"
+              >
+                edit
+              </v-btn>
+              <v-btn
+                class="material-symbols-outlined bg-red-600 text-white w-24"
+                @click="deleteModalToggle(driver.id)"
+              >
+                delete
+              </v-btn>
+            </div>
           </td>
         </tr>
       </tbody>
@@ -305,38 +332,34 @@ export default {
         class="modal-backdrop fixed inset-0 bg-black opacity-50"
         @click="createModalToggle"
       ></div>
-      <v-card class="bg-green-100 flex flex-col rounded p-4 w-3/6 h-2/6">
-        <v-card-text class="flex flex-col justify-center">
-          <Form
-            :validation-schema="userValidationSchema"
-            @submit="addUserHandler"
-          >
-            <v-row class="flex gap-4 mb-2">
-              <v-col cols="12" class="flex gap-4">
-                <Field name="username" v-slot="{ field, meta }">
-                  <v-text-field
-                    v-bind="field"
-                    label="Username"
-                    placeholder="Enter username"
-                    :error-messages="meta.touched ? meta.errors : []"
-                  />
-                </Field>
-                <Field name="password" v-slot="{ field, meta }">
-                  <v-text-field
-                    v-bind="field"
-                    label="Password"
-                    type="password"
-                    placeholder="Enter password"
-                    :error-messages="meta.touched ? meta.errors : []"
-                  />
-                </Field>
+      <v-card class="bg-green-100 flex flex-col rounded p-4 w-3/6 h-auto">
+        <v-card-text>
+          <form @submit.prevent="addDriverHandler">
+            <v-row class="flex justify-between">
+              <v-col cols="12" md="6">
+                <v-text-field
+                  v-model="name"
+                  label="Name"
+                  placeholder="Enter name"
+                  :error-messages="nameError"
+                />
+              </v-col>
+              <v-col cols="12" md="6">
+                <v-file-input
+                  label="Image"
+                  placeholder="Select File"
+                  :error-messages="imageError"
+                  @change="handleFileChange"
+                  prepend-icon=""
+                  class="overflow-hidden whitespace-nowrap truncate"
+                />
               </v-col>
             </v-row>
 
-            <!-- Buttons (Center-Aligned) -->
+            <!-- Button -->
             <div class="flex justify-between">
               <v-btn
-                @click="createModalToggle"
+                @click="showCreateModal = false"
                 class="material-symbols-outlined bg-red-600 text-white w-48 mb-4 text-2xl font-bold"
               >
                 clear
@@ -348,7 +371,7 @@ export default {
                 add
               </v-btn>
             </div>
-          </Form>
+          </form>
         </v-card-text>
       </v-card>
     </div>
@@ -362,32 +385,31 @@ export default {
         class="modal-backdrop fixed inset-0 bg-black opacity-50"
         @click="showEditModal = false"
       ></div>
-      <v-card class="bg-green-100 flex flex-col rounded p-4 w-3/6 h-2/6">
-        <v-card-text class="flex flex-col justify-center">
-          <Form @submit="editUserHandler">
-            <v-row class="flex gap-4 mb-2">
-              <v-col cols="12" class="flex gap-4">
-                <Field name="username" v-slot="{ field, meta }">
-                  <v-text-field
-                    v-bind="field"
-                    label="Username"
-                    placeholder="Enter username"
-                    :error-messages="meta.touched ? meta.errors : []"
-                  />
-                </Field>
-                <Field name="password" v-slot="{ field, meta }">
-                  <v-text-field
-                    v-bind="field"
-                    label="Password"
-                    type="password"
-                    placeholder="Enter password"
-                    :error-messages="meta.touched ? meta.errors : []"
-                  />
-                </Field>
+      <v-card class="bg-green-100 flex flex-col rounded p-4 w-3/6 h-auto">
+        <v-card-text>
+          <form @submit.prevent="editDriverHandler">
+            <v-row class="flex justify-between">
+              <v-col cols="12" md="6">
+                <v-text-field
+                  v-model="name"
+                  label="Name"
+                  placeholder="Enter name"
+                  :error-messages="nameError"
+                />
+              </v-col>
+              <v-col cols="12" md="6">
+                <v-file-input
+                  label="Image"
+                  placeholder="Select File"
+                  :error-messages="imageError"
+                  @change="handleFileChange"
+                  prepend-icon=""
+                  class="overflow-hidden whitespace-nowrap truncate"
+                />
               </v-col>
             </v-row>
 
-            <!-- Buttons (Center-Aligned) -->
+            <!-- Button -->
             <div class="flex justify-between">
               <v-btn
                 @click="showEditModal = false"
@@ -402,7 +424,7 @@ export default {
                 edit
               </v-btn>
             </div>
-          </Form>
+          </form>
         </v-card-text>
       </v-card>
     </div>
@@ -431,7 +453,7 @@ export default {
           </v-btn>
           <v-btn
             class="material-symbols-outlined bg-blue-600 text-white w-48 text-2xl font-bold"
-            @click="deleteUserHandler"
+            @click="deleteDriverHandler"
           >
             check
           </v-btn>

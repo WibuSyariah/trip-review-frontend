@@ -120,18 +120,9 @@ export default {
                   </div>
                 </li>
               </RouterLink>
-              <!-- <RouterLink to="/review"> -->
-              <li>
-                <div
-                  class="block rounded-lg px-4 py-2 text-sm font-medium text-black hover:text-gray-700"
-                >
-                  Review List
-                </div>
-              </li>
-              <!-- </RouterLink> -->
             </ul>
           </div>
-          <div v-if="role === 0">
+          <div v-if="role == 0">
             <li
               class="block rounded-lg px-4 pt-2 text-sm font-medium text-black hover:text-gray-700 text-nowrap cursor-pointer flex justify-between"
               @click="masterDataToggle"
@@ -140,24 +131,24 @@ export default {
               <i class="material-symbols-outlined">{{ dropdownIcon }}</i>
             </li>
             <ul v-show="showMasterData" class="">
-              <!-- <RouterLink to="/master/user"> -->
-              <li>
-                <div
-                  class="block rounded-lg px-4 py-2 text-sm font-medium text-black hover:text-gray-700"
-                >
-                  User
-                </div>
-              </li>
-              <!-- </RouterLink> -->
-              <!-- <RouterLink to="/master/driver"> -->
-              <li>
-                <div
-                  class="block rounded-lg px-4 py-2 text-sm font-medium text-black hover:text-gray-700"
-                >
-                  Driver
-                </div>
-              </li>
-              <!-- </RouterLink> -->
+              <RouterLink to="/master/user">
+                <li>
+                  <div
+                    class="block rounded-lg px-4 py-2 text-sm font-medium text-black hover:text-gray-700"
+                  >
+                    User
+                  </div>
+                </li>
+              </RouterLink>
+              <RouterLink to="/master/driver">
+                <li>
+                  <div
+                    class="block rounded-lg px-4 py-2 text-sm font-medium text-black hover:text-gray-700"
+                  >
+                    Driver
+                  </div>
+                </li>
+              </RouterLink>
               <!-- <RouterLink to="/master/car"> -->
               <li>
                 <div

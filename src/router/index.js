@@ -1,4 +1,5 @@
 import AuthLayout from "@/components/AuthLayout.vue";
+import DriverPage from "@/views/DriverPage.vue";
 import ReviewPage from "@/views/ReviewPage.vue";
 import TripPage from "@/views/TripPage.vue";
 import UserPage from "@/views/UserPage.vue";
@@ -18,6 +19,11 @@ const routes = [
             path: "user",
             component: UserPage,
             meta: { title: "User" },
+          },
+          {
+            path: "driver",
+            component: DriverPage,
+            meta: { title: "Driver" },
           },
         ],
       },
