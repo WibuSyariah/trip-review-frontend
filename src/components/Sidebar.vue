@@ -167,7 +167,7 @@ export default {
                   </div>
                 </li>
               </RouterLink>
-              <!-- <RouterLink to="/master/division"> -->
+              <RouterLink to="/master/division">
               <li>
                 <div
                   class="block rounded-lg px-4 py-2 text-sm font-medium text-black hover:text-gray-700"
@@ -175,7 +175,7 @@ export default {
                   Division
                 </div>
               </li>
-              <!-- </RouterLink> -->
+              </RouterLink>
               <!-- <RouterLink to="/master/e-money"> -->
               <li>
                 <div

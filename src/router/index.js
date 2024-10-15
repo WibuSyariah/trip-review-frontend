@@ -1,6 +1,7 @@
 import AuthLayout from "@/components/AuthLayout.vue";
 import CarPage from "@/views/CarPage.vue";
 import CompanyPage from "@/views/CompanyPage.vue";
+import DivisionPage from "@/views/DivisionPage.vue";
 import DriverPage from "@/views/DriverPage.vue";
 import ReviewPage from "@/views/ReviewPage.vue";
 import TripPage from "@/views/TripPage.vue";
@@ -36,6 +37,11 @@ const routes = [
             path: "company",
             component: CompanyPage,
             meta: { title: "Company" },
+          },
+          {
+            path: "division",
+            component: DivisionPage,
+            meta: { title: "Division" },
           },
         ],
       },
