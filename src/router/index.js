@@ -3,6 +3,7 @@ import CarPage from "@/views/CarPage.vue";
 import CompanyPage from "@/views/CompanyPage.vue";
 import DivisionPage from "@/views/DivisionPage.vue";
 import DriverPage from "@/views/DriverPage.vue";
+import EMoneyPage from "@/views/EMoneyPage.vue";
 import ReviewPage from "@/views/ReviewPage.vue";
 import TripPage from "@/views/TripPage.vue";
 import UserPage from "@/views/UserPage.vue";
@@ -42,6 +43,11 @@ const routes = [
             path: "division",
             component: DivisionPage,
             meta: { title: "Division" },
+          },
+          {
+            path: "e-money",
+            component: EMoneyPage,
+            meta: { title: "E-Money" },
           },
         ],
       },

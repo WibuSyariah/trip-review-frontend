@@ -5,10 +5,10 @@ import { mode, baseUrlApi, apiPrefix } from "../../config/url";
 
 const toast = useToast();
 
-export const useDivisionStore = defineStore({
-  id: "divisionStore",
+export const useEMoneyStore = defineStore({
+  id: "eMoneyStore",
   state: () => ({
-    divisions: [],
+    eMoneys: [],
     query: {
       limit: 10,
       currentPage: 1,
@@ -22,12 +22,12 @@ export const useDivisionStore = defineStore({
   }),
   getters: {},
   actions: {
-    async fetchDivision(params) {
+    async fetchEMoney(params) {
       const accessToken = localStorage.getItem("accessToken");
       try {
         const res = await axios({
           method: "get",
-          url: `${baseUrlApi[mode]}${apiPrefix}/division`,
+          url: `${baseUrlApi[mode]}${apiPrefix}/e-money`,
           params: params ? params : {},
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -36,7 +36,7 @@ export const useDivisionStore = defineStore({
 
         this.query.totalPages = res.data.data.totalPages;
         this.query.currentPage = res.data.data.currentPage;
-        this.divisions = res.data.data.divisions;
+        this.eMoneys = res.data.data.eMoneys;
       } catch (error) {
         console.error(error);
         toast.error(`Something went wrong`, {
@@ -46,12 +46,12 @@ export const useDivisionStore = defineStore({
         });
       }
     },
-    async createDivision(input) {
+    async createEMoney(input) {
       const accessToken = localStorage.getItem("accessToken");
       try {
         const res = await axios({
           method: "post",
-          url: `${baseUrlApi[mode]}${apiPrefix}/division/`,
+          url: `${baseUrlApi[mode]}${apiPrefix}/e-money/`,
           data: input,
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -78,12 +78,12 @@ export const useDivisionStore = defineStore({
         }
       }
     },
-    async deleteDivision(divisionId) {
+    async deleteEMoney(eMoneyId) {
       const accessToken = localStorage.getItem("accessToken");
       try {
         const res = await axios({
           method: "delete",
-          url: `${baseUrlApi[mode]}${apiPrefix}/division/${divisionId}`,
+          url: `${baseUrlApi[mode]}${apiPrefix}/e-money/${eMoneyId}`,
           headers: {
             Authorization: `Bearer ${accessToken}`,
           },
