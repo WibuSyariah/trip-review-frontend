@@ -15,9 +15,6 @@ export default {
       deleteId: 0,
       name: "",
       image: null,
-      nameError: "",
-      imageError: "",
-      searchBarKey: 0,
     };
   },
   mounted() {
@@ -59,8 +56,6 @@ export default {
         totalPages: 1,
       };
 
-      this.reloadSearchBar();
-
       await this.fetchDriver(this.query);
     },
 
@@ -92,41 +87,6 @@ export default {
         this.image = file; // Set the file to the 'image' data property
         this.imageUrl = URL.createObjectURL(file); // Generate a URL for previewing the image
       }
-    },
-
-    validateForm() {
-      let isValid = true;
-      this.nameError = "";
-      this.imageError = "";
-
-      // Validate name
-      if (!this.name) {
-        this.nameError = "Name is required";
-        isValid = false;
-      }
-
-      // Validate image
-      if (!this.image) {
-        this.imageError = "A file is required";
-        isValid = false;
-      } else {
-        const fileTypes = [
-          "image/jpeg",
-          "image/png",
-          "image/jpg",
-          "application/pdf",
-        ];
-        if (!fileTypes.includes(this.image.type)) {
-          this.imageError = "File must be .jpg, .jpeg, .png, or .pdf";
-          isValid = false;
-        }
-        if (this.image.size > 2000000) {
-          this.imageError = "File must be less than 2MB";
-          isValid = false;
-        }
-      }
-
-      return isValid;
     },
 
     editModalToggle(driverId) {
@@ -183,10 +143,6 @@ export default {
         this.showEditModal = false;
         this.showDeleteModal = false;
       }
-    },
-
-    reloadSearchBar() {
-      this.searchBarKey += 1; // Change the key to force reloading
     },
 
     async nextPage() {
@@ -332,16 +288,15 @@ export default {
         class="modal-backdrop fixed inset-0 bg-black opacity-50"
         @click="createModalToggle"
       ></div>
-      <v-card class="bg-green-100 flex flex-col rounded p-4 w-3/6 h-auto">
-        <v-card-text>
+      <v-card class="bg-green-100 flex flex-col rounded p-4 w-3/6 h-2/6">
+        <v-card-text class="flex flex-col justify-center">
           <form @submit.prevent="addDriverHandler">
-            <v-row class="flex justify-between">
+            <v-row class="flex mb-2 justify-center">
               <v-col cols="12" md="6">
                 <v-text-field
                   v-model="name"
                   label="Name"
                   placeholder="Enter name"
-                  :error-messages="nameError"
                 />
               </v-col>
               <v-col cols="12" md="6">
@@ -385,16 +340,15 @@ export default {
         class="modal-backdrop fixed inset-0 bg-black opacity-50"
         @click="showEditModal = false"
       ></div>
-      <v-card class="bg-green-100 flex flex-col rounded p-4 w-3/6 h-auto">
-        <v-card-text>
+      <v-card class="bg-green-100 flex flex-col rounded p-4 w-3/6 h-2/6">
+        <v-card-text class="flex flex-col justify-center">
           <form @submit.prevent="editDriverHandler">
-            <v-row class="flex justify-between">
+            <v-row class="flex mb-2 justify-center">
               <v-col cols="12" md="6">
                 <v-text-field
                   v-model="name"
                   label="Name"
                   placeholder="Enter name"
-                  :error-messages="nameError"
                 />
               </v-col>
               <v-col cols="12" md="6">
@@ -412,7 +366,7 @@ export default {
             <!-- Button -->
             <div class="flex justify-between">
               <v-btn
-                @click="showEditModal = false"
+                @click="showCreateModal = false"
                 class="material-symbols-outlined bg-red-600 text-white w-48 mb-4 text-2xl font-bold"
               >
                 clear

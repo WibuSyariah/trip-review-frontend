@@ -1,11 +1,11 @@
 <script>
 import { mapWritableState, mapActions } from "pinia";
-import { useUserStore } from "@/stores/user";
+import { useCarStore } from "@/stores/car";
 import { Form, Field } from "vee-validate";
 import * as yup from "yup";
 
 export default {
-  name: "UserPage",
+  name: "CarPage",
   data() {
     return {
       showCreateModal: false,
@@ -13,33 +13,32 @@ export default {
       showDeleteModal: false,
       editId: 0,
       deleteId: 0,
-      userValidationSchema: yup.object({
-        username: yup.string().required("Username is required"),
-        password: yup.string().required("Password is required"),
+      carValidationSchema: yup.object({
+        name: yup.string().required("Name is required"),
+        plateNumber: yup.string().required("Plate Number is required"),
       }),
-      searchBarKey: 0,
     };
   },
   mounted() {
-    this.fetchUser(this.query);
+    this.fetchCar(this.query);
     document.addEventListener("keydown", this.escKeyHandler);
   },
   beforeUnmount() {
     document.removeEventListener("keydown", this.escKeyHandler);
   },
   computed: {
-    ...mapWritableState(useUserStore, ["users", "query", "defaultQuery"]),
+    ...mapWritableState(useCarStore, ["cars", "query", "defaultQuery"]),
   },
   components: {
     Form,
     Field,
   },
   methods: {
-    ...mapActions(useUserStore, [
-      "fetchUser",
-      "createUser",
-      "editUser",
-      "deleteUser",
+    ...mapActions(useCarStore, [
+      "fetchCar",
+      "createCar",
+      "editCar",
+      "deleteCar",
     ]),
 
     async filterHandler(values) {
@@ -49,7 +48,7 @@ export default {
         currentPage: 1,
       };
 
-      await this.fetchUser(this.query);
+      await this.fetchCar(this.query);
     },
 
     async clearFilterHandler() {
@@ -59,22 +58,20 @@ export default {
         totalPages: 1,
       };
 
-      this.reloadSearchBar();
-
-      await this.fetchUser(this.query);
+      await this.fetchCar(this.query);
     },
 
     createModalToggle() {
       this.showCreateModal = !this.showCreateModal;
     },
 
-    async addUserHandler(values) {
+    async addCarHandler(values) {
       try {
-        const res = await this.createUser(values);
+        const res = await this.createCar(values);
 
         if (res.status === 201) {
           // Check for successful response
-          this.fetchUser(this.defaultQuery);
+          this.fetchCar(this.defaultQuery);
           this.$toast.success(res.data.message);
           this.showCreateModal = false;
         }
@@ -88,13 +85,13 @@ export default {
       this.showEditModal = true;
     },
 
-    async editUserHandler(values) {
+    async editCarHandler(values) {
       try {
-        const res = await this.editUser(this.editId, values);
+        const res = await this.editCar(this.editId, values);
 
         if (res.status === 200) {
           // Check for successful response
-          this.fetchUser(this.defaultQuery);
+          this.fetchCar(this.defaultQuery);
           this.showEditModal = false;
           this.editId = null;
           this.$toast.success(res.data.message);
@@ -109,13 +106,13 @@ export default {
       this.showDeleteModal = true;
     },
 
-    async deleteUserHandler() {
+    async deleteCarHandler() {
       try {
-        const res = await this.deleteUser(this.deleteId);
+        const res = await this.deleteCar(this.deleteId);
 
         if (res.status === 200) {
           // Check for successful response
-          this.fetchUser(this.defaultQuery);
+          this.fetchCar(this.defaultQuery);
           this.showDeleteModal = false;
           this.deleteId = null;
           this.$toast.success(res.data.message);
@@ -133,20 +130,16 @@ export default {
       }
     },
 
-    reloadSearchBar() {
-      this.searchBarKey += 1; // Change the key to force reloading
-    },
-
     async nextPage() {
       this.query.currentPage++;
 
-      await this.fetchUser(this.query);
+      await this.fetchCar(this.query);
     },
 
     async backPage() {
       this.query.currentPage--;
 
-      await this.fetchUser(this.query);
+      await this.fetchCar(this.query);
     },
   },
 };
@@ -154,14 +147,14 @@ export default {
 
 <template>
   <div class="w-full pr-4 pl-4 py-8 flex flex-col gap-4">
-    <!-- Heading and Add User Button -->
+    <!-- Heading and Add Car Button -->
     <div class="flex justify-between items-center">
-      <!-- Left: User List Title -->
+      <!-- Left: Car List Title -->
       <div class="text-2xl font-bold">
-        <h1>User List</h1>
+        <h1>Car List</h1>
       </div>
 
-      <!-- Right: Add User Button -->
+      <!-- Right: Add Car Button -->
       <div class="flex gap-4">
         <v-btn
           class="material-symbols-outlined bg-blue-600 text-white w-24 text-2xl font-bold"
@@ -172,63 +165,24 @@ export default {
       </div>
     </div>
 
-    <!-- Search Bar Section -->
-    <div
-      class="flex justify-around pb-2 pt-8 overflow-x-auto px-4 bg-gray-100 rounded shadow w-full"
-      :key="searchBarKey"
-    >
-      <Form class="flex gap-4" @submit="filterHandler">
-        <div>
-          <Field name="username" v-slot="{ field, meta }">
-            <v-text-field
-              v-bind="field"
-              label="Username"
-              placeholder="Enter Username"
-              :error-messages="meta.touched ? meta.errors : []"
-              class="w-56"
-            />
-          </Field>
-        </div>
-
-        <div class="flex gap-4">
-          <button
-            @click="clearFilterHandler"
-            type="button"
-            class="material-symbols-outlined bg-red-600 text-white w-24 rounded h-14"
-          >
-            clear
-          </button>
-          <button
-            class="material-symbols-outlined bg-blue-600 text-white w-24 rounded h-14"
-          >
-            search
-          </button>
-        </div>
-      </Form>
-    </div>
-
     <!-- Table Section -->
     <v-table class="rounded flex bg-gray-100 shadow">
       <thead>
         <tr>
-          <th class="text-center w-1/2">Username</th>
-          <th class="text-center w-1/2">Action</th>
+          <th class="text-center w-1/3">Name</th>
+          <th class="text-center w-1/3">Plate Number</th>
+          <th class="text-center w-1/3">Action</th>
         </tr>
       </thead>
 
       <tbody>
-        <tr v-for="user in users" :key="user.id">
-          <td class="text-center text-nowrap">{{ user.username }}</td>
+        <tr v-for="car in cars" :key="car.id">
+          <td class="text-center text-nowrap">{{ car.name }}</td>
+          <td class="text-center text-nowrap">{{ car.plateNumber }}</td>
           <td class="items-center justify-center flex gap-2">
             <v-btn
-              class="material-symbols-outlined bg-green-600 text-white w-24"
-              @click="editModalToggle(user.id)"
-            >
-              edit
-            </v-btn>
-            <v-btn
               class="material-symbols-outlined bg-red-600 text-white w-24"
-              @click="deleteModalToggle(user.id)"
+              @click="deleteModalToggle(car.id)"
             >
               delete
             </v-btn>
@@ -308,27 +262,26 @@ export default {
       <v-card class="bg-green-100 flex flex-col rounded p-4 w-3/6 h-2/6">
         <v-card-text class="flex flex-col justify-center">
           <Form
-            :validation-schema="userValidationSchema"
-            @submit="addUserHandler"
+            :validation-schema="carValidationSchema"
+            @submit="addCarHandler"
           >
             <v-row class="mb-2">
               <v-col cols="6">
-                <Field name="username" v-slot="{ field, meta }">
+                <Field name="name" v-slot="{ field, meta }">
                   <v-text-field
                     v-bind="field"
-                    label="Username"
-                    placeholder="Enter username"
+                    label="Name"
+                    placeholder="Enter Name"
                     :error-messages="meta.touched ? meta.errors : []"
                   />
                 </Field>
               </v-col>
               <v-col cols="6">
-                <Field name="password" v-slot="{ field, meta }">
+                <Field name="plateNumber" v-slot="{ field, meta }">
                   <v-text-field
                     v-bind="field"
-                    label="Password"
-                    type="password"
-                    placeholder="Enter password"
+                    label="Plate Number"
+                    placeholder="Enter plate number"
                     :error-messages="meta.touched ? meta.errors : []"
                   />
                 </Field>
@@ -348,62 +301,6 @@ export default {
                 class="material-symbols-outlined bg-blue-600 text-white text-2xl font-bold w-48 mb-4"
               >
                 add
-              </v-btn>
-            </div>
-          </Form>
-        </v-card-text>
-      </v-card>
-    </div>
-
-    <!-- Edit Modal Section -->
-    <div
-      v-if="showEditModal"
-      class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto"
-    >
-      <div
-        class="modal-backdrop fixed inset-0 bg-black opacity-50"
-        @click="showEditModal = false"
-      ></div>
-      <v-card class="bg-green-100 flex flex-col rounded p-4 w-3/6 h-2/6">
-        <v-card-text class="flex flex-col justify-center">
-          <Form @submit="editUserHandler">
-            <v-row class="mb-2">
-              <v-col cols="6">
-                <Field name="username" v-slot="{ field, meta }">
-                  <v-text-field
-                    v-bind="field"
-                    label="Username"
-                    placeholder="Enter username"
-                    :error-messages="meta.touched ? meta.errors : []"
-                  />
-                </Field>
-              </v-col>
-              <v-col cols="6">
-                <Field name="password" v-slot="{ field, meta }">
-                  <v-text-field
-                    v-bind="field"
-                    label="Password"
-                    type="password"
-                    placeholder="Enter password"
-                    :error-messages="meta.touched ? meta.errors : []"
-                  />
-                </Field>
-              </v-col>
-            </v-row>
-
-            <!-- Buttons (Center-Aligned) -->
-            <div class="flex justify-between">
-              <v-btn
-                @click="showEditModal = false"
-                class="material-symbols-outlined bg-red-600 text-white w-48 mb-4 text-2xl font-bold"
-              >
-                clear
-              </v-btn>
-              <v-btn
-                type="submit"
-                class="material-symbols-outlined bg-blue-600 text-white text-2xl font-bold w-48 mb-4"
-              >
-                edit
               </v-btn>
             </div>
           </Form>
@@ -435,7 +332,7 @@ export default {
           </v-btn>
           <v-btn
             class="material-symbols-outlined bg-blue-600 text-white w-48 text-2xl font-bold"
-            @click="deleteUserHandler"
+            @click="deleteCarHandler"
           >
             check
           </v-btn>
