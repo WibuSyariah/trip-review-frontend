@@ -150,13 +150,22 @@ export default {
                 </li>
               </RouterLink>
               <RouterLink to="/master/car">
-              <li>
-                <div
-                  class="block rounded-lg px-4 py-2 text-sm font-medium text-black hover:text-gray-700"
-                >
-                  Car
-                </div>
-              </li>
+                <li>
+                  <div
+                    class="block rounded-lg px-4 py-2 text-sm font-medium text-black hover:text-gray-700"
+                  >
+                    Car
+                  </div>
+                </li>
+              </RouterLink>
+              <RouterLink to="/master/company">
+                <li>
+                  <div
+                    class="block rounded-lg px-4 py-2 text-sm font-medium text-black hover:text-gray-700"
+                  >
+                    Company
+                  </div>
+                </li>
               </RouterLink>
               <!-- <RouterLink to="/master/division"> -->
               <li>
